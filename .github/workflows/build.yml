@@ -28,7 +28,7 @@ jobs:
         run: |
           TARGET_ZIP="${{ github.event.inputs.zip_name }}"
           if [ -z "$TARGET_ZIP" ]; then
-            TARGET_ZIP="editor.zip"
+            TARGET_ZIP="professional-photo-editor.zip"
           fi
 
           if [ ! -f "$TARGET_ZIP" ]; then

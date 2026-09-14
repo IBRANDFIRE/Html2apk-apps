@@ -28,7 +28,7 @@ jobs:
         run: |
           TARGET_ZIP="${{ github.event.inputs.zip_name }}"
           if [ -z "$TARGET_ZIP" ]; then
-            TARGET_ZIP="professional-photo-editor.zip"
+            TARGET_ZIP="editor.zip"
           fi
 
           if [ ! -f "$TARGET_ZIP" ]; then
@@ -54,7 +54,7 @@ jobs:
         run: |
           npm install
           npm install -D @capacitor/cli
-          npm install @capacitor/core @capacitor/android
+          npm install @capacitor/core @capacitor/android @capacitor/filesystem
 
           APP_TITLE="${{ github.event.inputs.app_name }}"
           if [ -z "$APP_TITLE" ]; then
@@ -71,6 +71,24 @@ jobs:
           npx cap add android
           npx cap sync android
 
+      - name: Inject Storage Permissions into AndroidManifest
+        run: |
+          node -e '
+          const fs = require("fs");
+          const manifestPath = "android/app/src/main/AndroidManifest.xml";
+          if (fs.existsSync(manifestPath)) {
+            let manifest = fs.readFileSync(manifestPath, "utf8");
+            const permissions = `
+    <uses-permission android.permission.READ_EXTERNAL_STORAGE />
+    <uses-permission android.permission.WRITE_EXTERNAL_STORAGE />
+    <uses-permission android.permission.READ_MEDIA_IMAGES />
+    <uses-permission android.permission.READ_MEDIA_VIDEO />
+</manifest>`;
+            manifest = manifest.replace("</manifest>", permissions);
+            fs.writeFileSync(manifestPath, manifest);
+          }
+          '
+
       - name: Build Debug APK with Gradle
         run: |
           cd android
@@ -82,3 +100,4 @@ jobs:
         with:
           name: app-debug-apk
           path: android/app/build/outputs/apk/debug/app-debug.apk
+

@@ -1,3 +1,4 @@
+
 name: Build Android APK
 
 on:
@@ -54,7 +55,7 @@ jobs:
         run: |
           npm install
           npm install -D @capacitor/cli
-          npm install @capacitor/core @capacitor/android @capacitor/filesystem
+          npm install @capacitor/core @capacitor/android
 
           APP_TITLE="${{ github.event.inputs.app_name }}"
           if [ -z "$APP_TITLE" ]; then
@@ -71,18 +72,21 @@ jobs:
           npx cap add android
           npx cap sync android
 
-      - name: Inject Storage Permissions into AndroidManifest
+      - name: Configure Capacitor Bridge for Downloads
         run: |
           node -e '
           const fs = require("fs");
-          const manifestPath = "android/app/src/main/AndroidManifest.xml";
-          if (fs.existsSync(manifestPath)) {
-            let manifest = fs.readFileSync(manifestPath, "utf8");
-            const permissions = `\n    <uses-permission android.permission.READ_EXTERNAL_STORAGE />\n    <uses-permission android.permission.WRITE_EXTERNAL_STORAGE />\n    <uses-permission android.permission.READ_MEDIA_IMAGES />\n    <uses-permission android.permission.READ_MEDIA_VIDEO />\n`;
-            manifest = manifest.replace("<application", permissions + "    <application");
-            fs.writeFileSync(manifestPath, manifest);
+          const configPath = "capacitor.config.json";
+          if (fs.existsSync(configPath)) {
+            let config = JSON.parse(fs.readFileSync(configPath, "utf8"));
+            config.server = config.server || {};
+            config.server.allowNavigation = ["*"];
+            config.android = config.android || {};
+            config.android.allowMixedContent = true;
+            fs.writeFileSync(configPath, JSON.stringify(config, null, 2));
           }
           '
+          npx cap copy android
 
       - name: Build Debug APK with Gradle
         run: |

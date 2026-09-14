@@ -78,13 +78,8 @@ jobs:
           const manifestPath = "android/app/src/main/AndroidManifest.xml";
           if (fs.existsSync(manifestPath)) {
             let manifest = fs.readFileSync(manifestPath, "utf8");
-            const permissions = `
-    <uses-permission android.permission.READ_EXTERNAL_STORAGE />
-    <uses-permission android.permission.WRITE_EXTERNAL_STORAGE />
-    <uses-permission android.permission.READ_MEDIA_IMAGES />
-    <uses-permission android.permission.READ_MEDIA_VIDEO />
-</manifest>`;
-            manifest = manifest.replace("</manifest>", permissions);
+            const permissions = `\n    <uses-permission android.permission.READ_EXTERNAL_STORAGE />\n    <uses-permission android.permission.WRITE_EXTERNAL_STORAGE />\n    <uses-permission android.permission.READ_MEDIA_IMAGES />\n    <uses-permission android.permission.READ_MEDIA_VIDEO />\n`;
+            manifest = manifest.replace("<application", permissions + "    <application");
             fs.writeFileSync(manifestPath, manifest);
           }
           '
@@ -100,4 +95,3 @@ jobs:
         with:
           name: app-debug-apk
           path: android/app/build/outputs/apk/debug/app-debug.apk
-

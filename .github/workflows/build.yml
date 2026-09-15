@@ -29,7 +29,7 @@ jobs:
         run: |
           TARGET_ZIP="${{ github.event.inputs.zip_name }}"
           if [ -z "$TARGET_ZIP" ]; then
-            TARGET_ZIP="minicraft.zip"
+            TARGET_ZIP="minicraftv2.zip"
           fi
 
           if [ ! -f "$TARGET_ZIP" ]; then
